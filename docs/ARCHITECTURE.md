@@ -72,7 +72,7 @@ The same AI agent should produce fundamentally different outputs for different u
 
 ```bash
 # Option A: pip
-pip install imp
+pip install imp-ai
 imp init  # creates local Postgres DB, generates config
 
 # Option B: Docker
@@ -161,8 +161,12 @@ imp import --file my-model.imp  # on a new machine
 -- The user (supports multi-user for team/family setups)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    external_id TEXT,                  -- identifier from MCP client or auth provider
+    display_name TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
-    calibration_complete BOOLEAN DEFAULT false
+    calibration_complete BOOLEAN DEFAULT false,
+
+    UNIQUE(external_id)
 );
 
 -- Slow-changing identity and value function
@@ -241,8 +245,8 @@ CREATE TABLE observations (
     -- Confidence
     confidence FLOAT DEFAULT 0.5,      -- how sure we are about this signal
     
-    -- Embedding for semantic search
-    embedding vector(1536),             -- pgvector embedding of the observation
+    -- Embedding for semantic search (dimension depends on chosen model)
+    embedding vector(1024),             -- pgvector embedding of the observation
     
     created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -257,6 +261,8 @@ CREATE TABLE contracts (
     
     generated_at TIMESTAMPTZ DEFAULT now(),
     valid_until TIMESTAMPTZ             -- contracts expire and regenerate
+    -- TTL: default 1 hour; invalidated early when new observations
+    -- shift expertise level or communication preferences
 );
 
 -- Data source connections
@@ -277,13 +283,15 @@ CREATE INDEX idx_expertise_user ON expertise_map(user_id);
 CREATE INDEX idx_expertise_domain ON expertise_map(user_id, domain);
 CREATE INDEX idx_observations_user ON observations(user_id);
 CREATE INDEX idx_observations_type ON observations(user_id, signal_type);
-CREATE INDEX idx_observations_embedding ON observations USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX idx_observations_embedding ON observations USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX idx_contracts_user_topic ON contracts(user_id, topic);
 ```
 
 ---
 
 ## 5. Extraction Pipeline
+
+**Note:** Each user message triggers a Claude API call for signal extraction. Consider batching low-signal messages (e.g., "thanks", "ok") and skipping extraction when no cognitive signal is likely. This controls both cost and rate limit exposure.
 
 ### 5.1 Per-Turn Extraction Prompt
 
@@ -454,6 +462,8 @@ def generate_contract(user_id: str, topic: str = None) -> dict:
 
 ### 6.1 Tools Exposed
 
+User identity is resolved from the `IMP_USER_ID` environment variable (set in MCP server config). Defaults to `"default"` for single-user setups.
+
 ```python
 # Tool 1: observe — called after every user message
 @mcp_tool(name="imp_observe")
@@ -462,8 +472,9 @@ def observe(user_message: str, conversation_context: str = "", topic: str = ""):
     Process a user message and update their cognitive model.
     Call this after every user message in the conversation.
     """
+    user_id = get_user_id()  # resolved from IMP_USER_ID env var
     signals = extract_signals(user_message, conversation_context)
-    update_cognitive_model(current_user_id, signals)
+    update_cognitive_model(user_id, signals)
     return {"status": "ok", "signals_detected": len(signals)}
 
 
@@ -474,7 +485,7 @@ def get_contract(topic: str = ""):
     Get the communication contract for the current user.
     Returns instructions on how to adapt the response to this specific user.
     """
-    contract = generate_contract(current_user_id, topic)
+    contract = generate_contract(get_user_id(), topic)
     return contract
 
 
@@ -484,7 +495,7 @@ def calibrate(role: str, priority: str, explanation_style: str):
     """
     Set initial calibration from onboarding questions.
     """
-    update_calibration(current_user_id, role, priority, explanation_style)
+    update_calibration(get_user_id(), role, priority, explanation_style)
     return {"status": "calibrated"}
 
 
@@ -494,7 +505,7 @@ def export():
     """
     Export the user's complete cognitive model as portable JSON.
     """
-    return export_cognitive_model(current_user_id)
+    return export_cognitive_model(get_user_id())
 
 
 # Tool 5: status — diagnostic
@@ -504,7 +515,7 @@ def status():
     Return a summary of what imp knows about the current user.
     Confidence levels, expertise domains, and model completeness.
     """
-    return get_model_summary(current_user_id)
+    return get_model_summary(get_user_id())
 ```
 
 ### 6.2 System Prompt Injection
@@ -679,7 +690,7 @@ imp/
 
 ## 10. MVP Scope (What to Build First)
 
-### Phase 1: Core Loop (Week 1-2)
+### Phase 1: Core Loop
 - [ ] Postgres schema + migrations
 - [ ] Extraction pipeline (Claude API call)
 - [ ] Cognitive model update engine
@@ -687,13 +698,13 @@ imp/
 - [ ] MCP server with `observe` and `get_contract` tools
 - [ ] CLI: `imp init` and `imp mcp-serve`
 
-### Phase 2: Onboarding (Week 3)
+### Phase 2: Onboarding
 - [ ] Calibration flow via MCP
 - [ ] GitHub ingester
 - [ ] Slack ingester
 - [ ] CLI: `imp connect`
 
-### Phase 3: Polish (Week 4)
+### Phase 3: Polish
 - [ ] Export/import
 - [ ] ZPD promotion logic with confidence thresholds
 - [ ] Contradiction resolution
@@ -761,6 +772,8 @@ If you use specialized agent roles (backend, database, frontend, etc.), imp enha
 ---
 
 ## 12. Open Source
+
+**Deployment:** Self-hosted (local) or cloud-hosted. Both have identical features — cloud provides only operational convenience. See `docs/THINKING.md` Decision 4 for rationale.
 
 **License**: Apache 2.0 (same as Mem0 — maximizes adoption, allows commercial use)
 

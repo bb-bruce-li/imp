@@ -86,7 +86,7 @@ This became imp's positioning: "Mem0 remembers what you said. imp understands ho
 - Prompted (system occasionally asks "did I get this right?")
 - Dashboard (full visibility with overrides)
 
-**Chosen: Invisible.** The adaptation should feel like magic, not like a settings page. The user just notices "this AI gets me." No cognitive overhead of managing a profile.
+**Chosen: Invisible by default.** The adaptation should feel like magic, not like a settings page. The user just notices "this AI gets me." No cognitive overhead of managing a profile. Opt-in visibility is available via CLI (`imp status`, `imp export`) for users who want to inspect or debug their model.
 
 ### Decision 3: Target User
 **Options considered:**
@@ -206,7 +206,7 @@ The novel part — using Claude API to analyze each user message for implicit co
 
 ---
 
-## Phase 5: Business Model
+## Phase 5: Business Model (Speculative)
 
 ### Revenue Logic
 - Open source builds trust and community (Supabase/PostHog model)
@@ -244,20 +244,20 @@ The novel part — using Claude API to analyze each user message for implicit co
 
 ## Build Order
 
-### Phase 1 (Week 1-2): Core Loop
+### Phase 1: Core Loop
 The minimum viable product is 4 files + MCP server:
 1. `extraction.py` — Claude API call that extracts cognitive signals
 2. `engine.py` — updates the cognitive model from signals
 3. `contract.py` — generates communication contracts
 4. `mcp.py` — MCP server exposing observe + get_contract
 
-### Phase 2 (Week 3): Onboarding
+### Phase 2: Onboarding
 GitHub + Slack ingesters for cold start. Calibration flow.
 
-### Phase 3 (Week 4): Intelligence
+### Phase 3: Intelligence
 ZPD promotion logic, contradiction resolution, temporal decay.
 
-### Phase 4 (Week 5-6): Distribution
+### Phase 4: Distribution
 PyPI package, cloud service, integration guides, product website.
 
 ---
