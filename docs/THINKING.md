@@ -290,6 +290,16 @@ Trusting system prompt injection to steer AI behavior. Style/level/pacing adjust
 - Level matching (C) alone will get eaten by platforms (Claude already has memory)
 - Principle inference (B) + cross-tool data is the real moat — platforms optimize for single-conversation quality, not long-term user modeling across tools
 
+### Multi-Front Application
+
+imp is not a developer tool or a customer service tool — it's a cognitive layer for any human-AI interaction. Same engine, multiple frontends:
+
+- **Internal (developers):** invisible tutor that teaches while helping, ZPD-based scaffolding
+- **External (customers):** adjusts tone, pacing, and content complexity when AI agents interact with customers. A confused grandmother and a tech-savvy user asking the same billing question get fundamentally different responses.
+- **Cross-context advantage:** if a user appears in multiple contexts (e.g., internal developer who also contacts support), imp builds a richer profile than any single-use tool can.
+
+The architecture is already domain-agnostic — cognitive profiles are per-user, contracts are per-interaction, signals work across domains. The extraction prompt and contract template may need domain-specific tuning, but the pipeline is identical.
+
 ---
 
 ## Build Order
