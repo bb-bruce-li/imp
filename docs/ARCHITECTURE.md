@@ -1,4 +1,4 @@
-# imp — Adaptive Cognitive User Model
+# imp — Invisible Tutor for AI Interactions
 
 ## Project Spec v0.1
 
@@ -89,21 +89,9 @@ docker run -v imp-data:/data ghcr.io/imp/imp:latest
 
 ### 3.2 Onboarding (< 2 minutes active input)
 
-**Step 1: Connect data sources (optional, 30 seconds)**
+**Step 1: Light calibration (60-90 seconds)**
 
-```bash
-imp connect github --token ghp_xxx
-imp connect slack --token xoxb_xxx
-```
-
-Background workers ingest and build initial profile:
-- GitHub: analyze commit messages, PR reviews, code complexity, languages used
-- Slack: analyze communication style, vocabulary level, topics discussed, role signals
-- Email: analyze priorities, decision patterns, formality level
-
-**Step 2: Light calibration (60-90 seconds)**
-
-On first conversation through any connected AI tool, imp intercepts and asks:
+On first conversation through any connected AI tool, imp asks:
 
 ```
 Before we start, a few quick questions to help me adapt to you:
@@ -115,7 +103,19 @@ Before we start, a few quick questions to help me adapt to you:
    → Just the answer / Brief context / Full reasoning
 ```
 
-These three answers seed the value_function and communication_profile.
+These three answers seed the value_function and communication_profile. This is enough for imp to generate a useful first contract.
+
+**Step 2: Connect data sources (optional, accelerates learning)**
+
+```bash
+imp connect github --token ghp_xxx
+imp connect slack --token xoxb_xxx
+```
+
+Background workers ingest and build a richer initial profile:
+- GitHub: analyze commit messages, PR reviews, code complexity, languages used
+- Slack: analyze communication style, vocabulary level, topics discussed, role signals
+- Email: analyze priorities, decision patterns, formality level
 
 **Step 3: Silent adaptation (forever)**
 
@@ -338,9 +338,16 @@ You ARE extracting cognitive patterns:
    They ask good questions about it, follow explanations, but don't use it
    independently. This is their learning edge.
 
+8. ENGINEERING_PRINCIPLE: What underlying engineering values or philosophy does
+   their message reveal? Not surface preferences ("use asyncpg") but deeper
+   principles: minimal indirection, consolidation over convenience, explicit
+   over implicit, composition over inheritance, simplicity over power.
+   These generalize across domains — someone who values "minimal indirection"
+   will reject ORMs, heavy frameworks, and unnecessary abstraction layers.
+
 Respond ONLY with a JSON array of signals. Each signal:
 {
-  "type": "vocabulary_use|abstraction_level|question_pattern|correction_behavior|decision_pattern|trust_signal|zpd_signal",
+  "type": "vocabulary_use|abstraction_level|question_pattern|correction_behavior|decision_pattern|trust_signal|zpd_signal|engineering_principle",
   "domain": "the technical/knowledge domain if applicable",
   "value": "description of the specific observation",
   "concepts": ["relevant", "concepts", "mentioned"],
@@ -396,7 +403,7 @@ def update_cognitive_model(user_id: str, signals: list[dict]):
             )
         
         # 3. Update cognitive profile if it's a meta-signal
-        if signal['type'] in ('abstraction_level', 'decision_pattern', 'trust_signal'):
+        if signal['type'] in ('abstraction_level', 'decision_pattern', 'trust_signal', 'engineering_principle'):
             update_profile(user_id, signal)
 
 
@@ -452,7 +459,14 @@ def generate_contract(user_id: str, topic: str = None) -> dict:
         # Code generation settings
         "code_level": derive_code_level(expertise),
         "comment_density": derive_comment_density(expertise),
-        
+
+        # Pacing
+        "pacing": derive_pacing(expertise),  # 'full' | 'chunked' | 'step_by_step'
+        "max_new_concepts_per_response": derive_concept_load(expertise),  # 1-3 based on level
+
+        # Engineering principles (generalize across domains)
+        "engineering_principles": get_inferred_principles(user_id),  # e.g. ["minimal_indirection", "explicit_over_implicit"]
+
         # Autonomy
         "autonomy_level": profile.autonomy_comfort,
         "needs_confirmation": profile.verification_tendency == 'verifies_everything'
@@ -553,6 +567,15 @@ Frame information in terms of: {framing}
 Code complexity level: {code_level}
 Comment density: {comment_density}
 
+Pacing: {pacing}
+- "full": present complete solution at once (for experts)
+- "chunked": break into 2-3 logical sections, explain each before moving on
+- "step_by_step": start with simplest working version, layer complexity one piece at a time
+Max new concepts per response: {max_new_concepts_per_response}
+
+Engineering principles this user values (apply across all domains):
+{engineering_principles}
+
 {autonomy_instructions}
 """
 ```
@@ -647,7 +670,43 @@ def ingest_slack(user_id: str, token: str):
 
 ---
 
-Same question. Same data. Completely different communication, shaped by each user's cognitive model.
+### User C: Mid-level Engineer (Alex)
+```json
+{
+  "abstraction_level": "implementation",
+  "detail_depth": "moderate",
+  "known_concepts": ["basic SQL", "REST APIs", "Python functions"],
+  "zpd_edge": ["query optimization", "EXPLAIN ANALYZE"],
+  "avoid_concepts": ["partitioning strategies", "materialized views", "CQRS"],
+  "framing": "step-by-step",
+  "code_level": "intermediate",
+  "explanation_style": "full_reasoning",
+  "pacing": "step_by_step",
+  "max_new_concepts_per_response": 1,
+  "engineering_principles": []
+}
+```
+
+**Alex asks:** "How are our Meta campaigns performing?"
+
+**Agent response with imp:**
+> Let me start with the high-level picture: Meta spend is up 12% this month, but our cost per acquisition (CPA) actually dropped 8%. That means we're spending more but getting better results per dollar.
+>
+> The main reason is the retargeting lookalike audience — it drives 40% of our conversions at half the cost of prospecting campaigns.
+>
+> One thing worth investigating: Meta changed how they count conversions last week. To check if our numbers are still accurate, you could run this query against our events table:
+> ```sql
+> SELECT date, COUNT(*) as conversions, source
+> FROM meta_events
+> WHERE date > now() - interval '14 days'
+> GROUP BY date, source
+> ORDER BY date;
+> ```
+> Look for any sudden jump around the date of the change — that would suggest inflated numbers. Want me to walk through how to interpret the results?
+
+---
+
+Same question. Same data. Three completely different responses. Sarah gets a business summary. Bruce gets a systems-level analysis. Alex gets a stepped explanation that teaches query investigation while answering the question — imp detected that query optimization is at Alex's learning edge and used this as a teaching moment.
 
 ---
 

@@ -203,6 +203,7 @@ The novel part — using Claude API to analyze each user message for implicit co
 5. **Decision patterns** — what they optimize for in tradeoffs
 6. **Trust signals** — verify, question, or accept AI output?
 7. **ZPD signals** — concepts they engage with but don't use independently
+8. **Engineering principles** — underlying values like "minimal indirection", "explicit over implicit" — these generalize across domains and situations the user has never explicitly addressed
 
 ---
 
