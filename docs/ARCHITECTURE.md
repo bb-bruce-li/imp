@@ -728,7 +728,7 @@ imp/
 │   │   └── api.py              # Optional REST API (for non-MCP tools)
 │   │
 │   ├── core/
-│   │   ├── models.py           # SQLAlchemy models
+│   │   ├── models.py           # Data models and DB queries (asyncpg)
 │   │   ├── extraction.py       # Signal extraction pipeline
 │   │   ├── engine.py           # Cognitive model update engine
 │   │   ├── contract.py         # Communication contract generator

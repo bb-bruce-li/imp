@@ -25,7 +25,8 @@ Core principle ("2×2 → 2+2"): same answer, different encoding, matched to wha
 - PostgreSQL + pgvector
 - Claude API (signal extraction)
 - MCP protocol (tool interface)
-- SQLAlchemy + Alembic (ORM + migrations)
+- asyncpg (raw SQL, no ORM)
+- Alembic (migrations only)
 - Docker Compose (local dev)
 - PyPI package name: `imp-ai` (import as `from imp_ai import ...`)
 
@@ -48,7 +49,7 @@ imp/
 │   │   ├── mcp.py              # MCP server
 │   │   └── api.py              # Optional REST API
 │   ├── core/
-│   │   ├── models.py           # SQLAlchemy models
+│   │   ├── models.py           # Data models and DB queries (asyncpg)
 │   │   ├── extraction.py       # Signal extraction pipeline
 │   │   ├── engine.py           # Cognitive model update engine
 │   │   ├── contract.py         # Contract generator
