@@ -69,7 +69,6 @@ imp/
 
 - `docs/ARCHITECTURE.md` — full spec: schema, extraction prompts, MCP interface, project phases
 - `docs/THINKING.md` — design rationale, competitive landscape, key decisions and why
-- `docs/計劃書.md` — Chinese version of the planning document
 
 ## Implementation Phases
 
