@@ -2,19 +2,27 @@
 
 ## Project Spec v0.1
 
-> "Mem0 remembers what you said. imp understands how you think."
+> "AI makes juniors productive. imp makes them competent."
 
 ---
 
 ## 1. What This Is
 
-A self-hosted, privacy-first cognitive modeling layer that builds a deep understanding of each user — their expertise, communication style, decision patterns, and learning edge — and makes that understanding available to any AI tool via MCP protocol.
+A self-hosted, privacy-first **invisible tutor** that turns every AI interaction into a learning opportunity — without slowing anyone down. imp models how users think, detects what they don't know they don't know, and makes AI teach them while it helps them.
 
-Unlike memory systems (Mem0, Letta) that store facts, imp models *cognition*: what a user knows, how they think, what they optimize for, and how to communicate with them effectively.
+Unlike memory systems (Mem0, Letta) that store facts, imp models *cognition*: what a user knows, how they think, what they optimize for, and where their learning edge is. It exposes this understanding to any AI tool via MCP protocol.
 
-### Core Insight
+### The Problem
 
-The same AI agent should produce fundamentally different outputs for different users — not just in content, but in abstraction level, vocabulary, framing, and detail depth. A CEO gets cost/timeline framing. A senior engineer gets tight code with architectural context. A junior engineer gets explained code with scaffolding. Same underlying logic, three different communication contracts.
+AI lets juniors produce working code without understanding it. They skip fundamentals because AI makes it possible — and they won't go back to learn basics. The only viable learning path is **learning while doing**. But users can't scaffold themselves — they don't know what they don't know, and they won't ask for help with things they don't realize they're missing.
+
+### Core Insight ("2×2 → 2+2")
+
+Same answer, different encoding, matched to what the user can process. imp delivers this through three mechanisms:
+
+1. **Level matching** — don't write code the user can't read, don't explain concepts they already know
+2. **Principle inference** — learn underlying engineering values (e.g., "minimal indirection") and generalize to new situations
+3. **Pacing** — break solutions into digestible steps, sequence the teaching so users absorb before moving forward
 
 ---
 
@@ -690,23 +698,22 @@ imp/
 
 ## 10. MVP Scope (What to Build First)
 
-### Phase 1: Core Loop
-- [ ] Postgres schema + migrations
-- [ ] Extraction pipeline (Claude API call)
-- [ ] Cognitive model update engine
-- [ ] Contract generator
+### Phase 1: Core Loop + ZPD
+- [ ] Postgres schema + migrations (including ZPD tracking)
+- [ ] Extraction pipeline (Claude API call) — level, principle, and ZPD signals
+- [ ] Cognitive model update engine with ZPD promotion/demotion
+- [ ] Contract generator with pacing/sequencing output
 - [ ] MCP server with `observe` and `get_contract` tools
 - [ ] CLI: `imp init` and `imp mcp-serve`
+- [ ] Calibration flow via MCP (cold-start from 2-3 questions)
 
-### Phase 2: Onboarding
-- [ ] Calibration flow via MCP
-- [ ] GitHub ingester
-- [ ] Slack ingester
+### Phase 2: Cold-Start Acceleration
+- [ ] GitHub ingester (infer expertise from code/PRs/reviews)
+- [ ] Slack ingester (communication style, vocabulary, role signals)
 - [ ] CLI: `imp connect`
 
 ### Phase 3: Polish
 - [ ] Export/import
-- [ ] ZPD promotion logic with confidence thresholds
 - [ ] Contradiction resolution
 - [ ] Contract caching and invalidation
 - [ ] Docker compose for one-command setup
@@ -797,11 +804,11 @@ Wanted ingesters: Notion, Linear, Discord, Google Docs, Calendar, browser histor
 
 ### Public Roadmap
 
-- **v0.1** — Core loop: extraction + cognitive model + contract + MCP server + CLI
-- **v0.2** — Onboarding: GitHub/Slack ingesters + calibration + Docker setup
-- **v0.3** — Intelligence: ZPD promotion + contradiction resolution + temporal decay
+- **v0.1** — Core loop: extraction + cognitive model + ZPD tracking + contract (with pacing) + MCP server + CLI + calibration
+- **v0.2** — Cold-start: GitHub/Slack ingesters + Docker setup
+- **v0.3** — Polish: contradiction resolution + contract caching + export/import
 - **v0.4** — Ecosystem: Copilot/Cursor guides + LangChain SDK + plugin system
-- **v1.0** — Production: multi-user teams + model versioning + benchmarks vs Mem0/Letta
+- **v1.0** — Teams: multi-user + admin dashboards + model versioning
 
 ---
 
@@ -810,7 +817,7 @@ Wanted ingesters: Notion, Linear, Discord, Google Docs, Calendar, browser histor
 **Brand**: imp
 **Package**: imp-ai
 **CLI**: imp
-**Tagline**: "AI that understands how you think"
+**Tagline**: "AI makes juniors productive. imp makes them competent."
 **One-liner**: "Mem0 remembers what you said. imp understands how you think."
 
 The name works because:

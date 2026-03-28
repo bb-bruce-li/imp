@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-imp is a self-hosted, privacy-first **cognitive modeling layer** for AI tools. It models how users think — expertise, communication style, decision patterns, learning edge — and exposes that understanding via MCP protocol. Unlike memory systems (Mem0, Letta) that store facts, imp models cognition.
+imp is a self-hosted, privacy-first **invisible tutor** that turns every AI interaction into a learning opportunity — without slowing anyone down. It models how users think, detects what they don't know they don't know, and makes AI teach them while it helps them. Unlike memory systems (Mem0, Letta) that store facts, imp models cognition.
 
-Core principle ("2×2 → 2+2"): same answer, different encoding, matched to what the user can process.
+Tagline: "AI makes juniors productive. imp makes them competent."
+
+Core principle ("2×2 → 2+2"): same answer, different encoding, matched to what the user can process. Delivered through three mechanisms: **level matching** (don't write code they can't read), **principle inference** (learn engineering values, generalize to new situations), and **pacing** (sequence teaching so users absorb before moving forward).
 
 ## Architecture
 
@@ -70,7 +72,7 @@ imp/
 
 ## Implementation Phases
 
-1. **Core Loop** — Postgres schema, extraction pipeline, engine, contract generator, MCP server, CLI (`init`, `mcp-serve`)
-2. **Onboarding** — calibration flow, GitHub/Slack ingesters, `imp connect`
-3. **Polish** — export/import, ZPD promotion thresholds, contradiction resolution, contract caching, Docker compose
+1. **Core Loop + ZPD** — Postgres schema, extraction pipeline, engine with ZPD promotion/demotion, contract generator with pacing, MCP server, CLI (`init`, `mcp-serve`), calibration flow
+2. **Cold-Start Acceleration** — GitHub/Slack ingesters, `imp connect`
+3. **Polish** — export/import, contradiction resolution, contract caching, Docker compose
 4. **Distribution** — PyPI, Docker image, integration guides

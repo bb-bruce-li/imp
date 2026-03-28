@@ -242,20 +242,70 @@ The novel part — using Claude API to analyze each user message for implicit co
 
 ---
 
+## Phase 6: Idea Review (2026-03-28)
+
+### Reframing: Invisible Tutor, Not Adaptation Layer
+
+Through critical review, we reframed imp from an "adaptation layer that adjusts communication style" to an **invisible tutor that makes AI teach while it helps**. The core problem: AI lets juniors produce without understanding. They skip fundamentals, can't debug what AI wrote, and either become dependent or reject AI entirely.
+
+**New tagline:** "AI makes juniors productive. imp makes them competent."
+
+### Three Mechanisms (B+C)
+
+imp's value comes from three things working together:
+1. **Level matching (C)** — don't write code the user can't read
+2. **Principle inference (B)** — learn engineering values (e.g., "minimal indirection") and generalize to new situations
+3. **Pacing** — break solutions into digestible steps, sequence the teaching
+
+Preference detection (A) — "use asyncpg not ORM" — is Mem0 territory. Not imp's differentiator.
+
+### ZPD Is Core, Not Phase 3
+
+ZPD tracking was originally Phase 3 (Polish). But ZPD is the product — it's what detects unknown unknowns and drives scaffolded teaching. Moved to Phase 1.
+
+### Cold-Start: Calibration Is Enough
+
+Debated whether GitHub/Slack ingestion needs to be Phase 1 for time-to-value. Conclusion: no.
+- Individual users who find imp are self-aware learners — they have patience
+- Team/org deployment is invisible — there's no "first impression" to fail
+- 2-3 calibration questions provide enough signal to generate a useful first contract
+
+### Feedback Loop: Evidence Accumulation
+
+No special correction mechanism needed. One bad signal doesn't move the needle if there are 50 prior signals. This is a sampling and weighting problem — with more samples, accuracy improves naturally. Default: err toward more explanation, not less. "Dumbing down" is mild annoyance; talking over heads is harmful.
+
+### Buyer Tiers (Sequenced)
+
+1. **Individual** — self-aware learners install it themselves (launch)
+2. **Team** — engineering managers deploy it for their team (revenue)
+3. **Platform** — AI tools embed imp natively (scale via partnerships)
+
+### Contract Compliance
+
+Trusting system prompt injection to steer AI behavior. Style/level/pacing adjustments are well within what system prompts reliably control. Not a concern.
+
+### Competitive Moat
+
+- Level matching (C) alone will get eaten by platforms (Claude already has memory)
+- Principle inference (B) + cross-tool data is the real moat — platforms optimize for single-conversation quality, not long-term user modeling across tools
+
+---
+
 ## Build Order
 
-### Phase 1: Core Loop
-The minimum viable product is 4 files + MCP server:
-1. `extraction.py` — Claude API call that extracts cognitive signals
-2. `engine.py` — updates the cognitive model from signals
-3. `contract.py` — generates communication contracts
-4. `mcp.py` — MCP server exposing observe + get_contract
+### Phase 1: Core Loop + ZPD
+The minimum viable product is 5 files + MCP server:
+1. `extraction.py` — Claude API call that extracts level, principle, and ZPD signals
+2. `engine.py` — updates the cognitive model with ZPD promotion/demotion
+3. `zpd.py` — ZPD tracking and promotion logic
+4. `contract.py` — generates communication contracts with pacing/sequencing
+5. `mcp.py` — MCP server exposing observe + get_contract + calibrate
 
-### Phase 2: Onboarding
-GitHub + Slack ingesters for cold start. Calibration flow.
+### Phase 2: Cold-Start Acceleration
+GitHub + Slack ingesters to bootstrap profiles faster.
 
-### Phase 3: Intelligence
-ZPD promotion logic, contradiction resolution, temporal decay.
+### Phase 3: Polish
+Contradiction resolution, contract caching, export/import.
 
 ### Phase 4: Distribution
 PyPI package, cloud service, integration guides, product website.
